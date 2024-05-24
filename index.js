@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 app.use(express.json());
 app.use(
   cors({
-    origin: [''],
+    origin: ['https://smn-client.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
