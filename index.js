@@ -36,6 +36,7 @@ app.get('/api/user/:username', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 app.listen(4000, () => {
   console.log('Server running on 4000');
 });

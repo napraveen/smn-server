@@ -151,4 +151,14 @@ router.get('/check-auth', (req, res) => {
   });
 });
 
+router.post('/logout', (req, res) => {
+  res.cookie('token', '', {
+    expires: new Date(0),
+    httpOnly: true,
+    sameSite: 'None',
+    secure: true,
+  });
+  res.json({ message: 'Logged out successfully' });
+});
+
 module.exports = router;
