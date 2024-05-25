@@ -5,16 +5,17 @@ const { User } = require('./db');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+require('dotenv').config();
 app.use(express.json());
 app.use(
   cors({
-    origin: ['http://localhost:3000'],
+    origin: [process.env.CLIENT_ORIGIN],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
 );
 app.use(cookieParser());
-require('dotenv').config();
+
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB is  connected successfully'))
