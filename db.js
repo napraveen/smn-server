@@ -20,8 +20,9 @@ const userSchema = new mongoose.Schema({
 });
 
 const bookSchema = new mongoose.Schema({
-  title: String,
+  bookname: String,
   author: String,
+  description: String,
   fileUrl: String,
 });
 

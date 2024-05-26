@@ -65,10 +65,12 @@ app.post('/api/upload-image', upload.single('file'), async (req, res) => {
     await uploadBytes(storageRef, fileBuffer);
     const downloadURL = await getDownloadURL(storageRef);
     const newBook = new Book({
-      title: req.body.title,
+      bookname: req.body.bookname,
       author: req.body.author,
+      description: req.body.description,
       fileUrl: downloadURL,
     });
+    console.log(newBook);
     await newBook.save();
 
     res.status(200).json({ imageUrl: downloadURL });
