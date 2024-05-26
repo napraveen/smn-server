@@ -51,17 +51,16 @@ app.get('/books', async (req, res) => {
   }
 });
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.post('/api/upload-image', upload.single('file'), async (req, res) => {
   const file = req.file;
   if (!file) {
     return res.status(400).send('No file uploaded.');
   }
-  const filePath = path.resolve(file.path);
 
   try {
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = file.buffer;
     const storageRef = ref(storage, 'uploads/' + file.originalname);
     await uploadBytes(storageRef, fileBuffer);
     const downloadURL = await getDownloadURL(storageRef);
@@ -76,13 +75,6 @@ app.post('/api/upload-image', upload.single('file'), async (req, res) => {
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-  } finally {
-    try {
-      fs.unlinkSync(filePath);
-      console.log('Temporary file deleted:', filePath);
-    } catch (deleteError) {
-      console.error('Error deleting temporary file:', deleteError);
-    }
   }
 });
 
