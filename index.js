@@ -80,6 +80,34 @@ app.post('/api/upload-image', upload.single('file'), async (req, res) => {
   }
 });
 
+app.get('/allusers', async (req, res) => {
+  const users = await User.find();
+  console.log(users);
+  res.json(users);
+});
+app.post('/verify', async (req, res) => {
+  const { userId } = req.body;
+  const user = await User.findById(userId);
+  if (user) {
+    user.verified = true;
+    await user.save();
+    res.json({ success: true, message: 'User verified' });
+  } else {
+    res.status(404).json({ error: 'User not found' });
+  }
+});
+
+app.delete('/reject', async (req, res) => {
+  const { userId } = req.body;
+  console.log(`Deleting user with ID: ${userId}`);
+  const user = await User.findByIdAndDelete(userId);
+  if (user) {
+    res.json({ success: true, message: 'User deleted' });
+  } else {
+    res.status(404).json({ error: 'User not found' });
+  }
+});
+
 app.listen(4000, () => {
   console.log('Server running on 4000');
 });
