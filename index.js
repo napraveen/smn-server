@@ -1,11 +1,16 @@
 const express = require('express');
-
 const app = express();
-const { User } = require('./db');
+const { User, Book } = require('./db');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
+const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
+const { storage } = require('./firebaseConfig.js');
+
 app.use(express.json());
 app.use(
   cors({
@@ -15,13 +20,13 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.use('/auth', require('./routes/auth'));
 
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB is  connected successfully'))
+  .then(() => console.log('MongoDB is connected successfully'))
   .catch((err) => console.error(err));
 
-app.use('/auth', require('./routes/auth'));
 app.get('/', (req, res) => {
   res.send('Hello');
 });
@@ -34,6 +39,50 @@ app.get('/api/user/:username', async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/books', async (req, res) => {
+  try {
+    const books = await Book.find();
+    res.json(books);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+});
+
+const upload = multer({ dest: 'uploads/' });
+
+app.post('/api/upload-image', upload.single('file'), async (req, res) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).send('No file uploaded.');
+  }
+  const filePath = path.resolve(file.path);
+
+  try {
+    const fileBuffer = fs.readFileSync(filePath);
+    const storageRef = ref(storage, 'uploads/' + file.originalname);
+    await uploadBytes(storageRef, fileBuffer);
+    const downloadURL = await getDownloadURL(storageRef);
+    const newBook = new Book({
+      title: req.body.title,
+      author: req.body.author,
+      fileUrl: downloadURL,
+    });
+    await newBook.save();
+
+    res.status(200).json({ imageUrl: downloadURL });
+  } catch (error) {
+    console.log('Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  } finally {
+    try {
+      fs.unlinkSync(filePath);
+      console.log('Temporary file deleted:', filePath);
+    } catch (deleteError) {
+      console.error('Error deleting temporary file:', deleteError);
+    }
   }
 });
 

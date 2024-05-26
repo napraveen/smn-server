@@ -18,5 +18,14 @@ const userSchema = new mongoose.Schema({
     default: new Date(),
   },
 });
+
+const bookSchema = new mongoose.Schema({
+  title: String,
+  author: String,
+  fileUrl: String,
+});
+
+const Book = mongoose.model('Book', bookSchema);
+
 const User = mongoose.model('User', userSchema);
-module.exports = { User };
+module.exports = { User, Book };
