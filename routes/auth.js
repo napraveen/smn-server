@@ -137,6 +137,16 @@ router.get('/check-auth', (req, res) => {
     }
     const email = decoded.email;
     const user = await User.findOne({ email: decoded.email });
+
+    if (!user) {
+      res.clearCookie('token');
+
+      return res.json({
+        authenticated: false,
+        message: 'User not found',
+      });
+    }
+
     const username = user.username;
     // const user = await User.findOne({ email: decoded.email });
     // if (!user) {
