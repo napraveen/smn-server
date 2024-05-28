@@ -81,7 +81,7 @@ app.post('/api/upload-image', upload.single('file'), async (req, res) => {
 });
 
 app.get('/allusers', async (req, res) => {
-  const users = await User.find();
+  const users = await User.find({ verified: '' });
   console.log(users);
   res.json(users);
 });
