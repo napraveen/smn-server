@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   verified: {
     type: String,
     required: [false],
+    default: '',
   },
   createdAt: {
     type: Date,
@@ -30,7 +31,24 @@ const bookSchema = new mongoose.Schema({
   fileUrl: String,
 });
 
+const IssuedBookSchema = new mongoose.Schema({
+  bookname: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Book',
+    required: [true, 'Book reference is required'],
+  },
+  availedUser: {
+    type: String,
+    required: [false],
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const Book = mongoose.model('Book', bookSchema);
 
 const User = mongoose.model('User', userSchema);
-module.exports = { User, Book };
+const IssuedBook = mongoose.model('IssuedBook', IssuedBookSchema);
+module.exports = { User, Book, IssuedBook };

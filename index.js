@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const { User, Book } = require('./db');
+const { User, Book, IssuedBook } = require('./db');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
@@ -105,6 +105,67 @@ app.delete('/reject', async (req, res) => {
     res.json({ success: true, message: 'User deleted' });
   } else {
     res.status(404).json({ error: 'User not found' });
+  }
+});
+
+app.post('/issue-book', async (req, res) => {
+  try {
+    const { bookId, username } = req.body;
+    console.log(username);
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    const issuedBook = new IssuedBook({
+      bookname: bookId,
+      availedUser: username,
+      date: new Date(),
+    });
+    await issuedBook.save();
+    res
+      .status(200)
+      .json({ success: true, message: 'Book issued successfully' });
+  } catch (error) {
+    console.error('Error issuing book:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/issued-books', async (req, res) => {
+  const response = await IssuedBook.find();
+  res.json(response);
+});
+
+app.get('/find-bookname/:bookId', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.bookId);
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    res.json(book.bookname);
+  } catch (error) {
+    console.error('Error finding book name:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.get('/mybooks/:username', async (req, res) => {
+  try {
+    console.log('sg');
+    const username = req.params.username;
+    const issuedBooks = await IssuedBook.find({ availedUser: username });
+    if (!issuedBooks) {
+      return res.status(404).json({ error: 'No books found' });
+    }
+    res.json(issuedBooks);
+  } catch (error) {
+    console.error('Error fetching books:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
